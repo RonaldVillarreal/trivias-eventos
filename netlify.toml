@@ -2,6 +2,19 @@
   command = "npm run build"
   publish = "dist"
 
+# Config de Appwrite. Estos valores se incrustan en el bundle del cliente
+# (no son secretos). La seguridad se controla por permisos y dominios
+# autorizados en Appwrite (Settings -> Platforms).
+[build.environment]
+  VITE_APPWRITE_ENDPOINT = "https://sfo.cloud.appwrite.io/v1"
+  VITE_APPWRITE_PROJECT_ID = "6a33435d000e95766944"
+  VITE_APPWRITE_DATABASE_ID = "6a3344c80013474ccde5"
+  VITE_APPWRITE_BUCKET_COVERS = "6a349ef20004f460091b"
+  VITE_APPWRITE_COL_EVENTS = "events"
+  VITE_APPWRITE_COL_TRIVIAS = "trivias"
+  VITE_APPWRITE_COL_OPTIONS = "options"
+  VITE_APPWRITE_COL_VOTES = "votes"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
