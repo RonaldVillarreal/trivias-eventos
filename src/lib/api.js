@@ -15,6 +15,12 @@ export async function register(email, password, name) {
   return login(email, password);
 }
 
+// Crea otra cuenta de admin SIN tocar la sesión actual (no inicia sesión con
+// el nuevo usuario). En esta app cualquier cuenta registrada es admin.
+export async function createAdmin(email, password, name) {
+  return account.create(ID.unique(), email, password, name || email);
+}
+
 export async function logout() {
   return account.deleteSession("current");
 }

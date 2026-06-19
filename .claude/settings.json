@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git remote *)",
+      "PowerShell(Stop-Process -Name node -Force -ErrorAction SilentlyContinue; Start-Sleep 2; \"node procesos vivos: $\\(\\(Get-Process -Name node -ErrorAction SilentlyContinue | Measure-Object\\).Count\\)\")"
+    ]
+  }
+}
