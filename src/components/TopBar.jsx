@@ -13,14 +13,11 @@ export default function TopBar() {
     >
       <div className="container row between" style={{ height: 64 }}>
         <Link to="/panel" className="row" style={{ gap: 10 }}>
-          <span
-            style={{
-              width: 30, height: 30, borderRadius: 9,
-              background: "linear-gradient(135deg, var(--mauve), var(--peach))",
-              display: "inline-block",
-            }}
+          <img
+            src="/logo-bloom-horizontal.jpeg"
+            alt="Bloom Trivias"
+            style={{ height: 38, width: "auto", display: "block" }}
           />
-          <strong style={{ fontFamily: "var(--display)", fontSize: 18 }}>Trivias</strong>
         </Link>
         <div className="row" style={{ gap: 14 }}>
           <span className="muted small">{user?.name || user?.email}</span>

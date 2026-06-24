@@ -28,10 +28,12 @@ export default function Login() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 22 }}>
       <div className="card" style={{ width: "100%", maxWidth: 420, padding: 36, background: "var(--white)" }}>
+        <img
+          src="/logo-bloom-cuadrado.jpeg"
+          alt="Bloom Trivias"
+          style={{ width: 190, height: "auto", display: "block", margin: "0 auto 4px" }}
+        />
         <p className="eyebrow center">Panel del organizador</p>
-        <h1 className="center mt-1" style={{ fontSize: 30 }}>
-          Trivias para<br />tus eventos
-        </h1>
         <p className="muted small center mt-1 mb-3">
           {mode === "login" ? "Ingresá para gestionar tus eventos." : "Creá tu cuenta de organizador."}
         </p>
