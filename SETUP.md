@@ -71,6 +71,16 @@ Reiniciá `npm run dev`.
 - **Admin (organizador):** se registra/loguea en `/login`, gestiona todo en `/panel`.
 - **Invitado:** entra por el link público `/votar/:triviaId`. No tiene acceso al panel ni necesita cuenta; solo pone su nombre y vota.
 
+**Workspace compartido (varios admins)**
+El panel es un espacio **compartido**: todos los admins ven y gestionan los mismos eventos y
+trivias (no es por dueño). Así, dos o más organizadores pueden trabajar sobre lo mismo.
+- Los eventos/trivias **nuevos** ya se crean compartidos automáticamente.
+- Para los que existían **antes** de esta versión, corré una sola vez la migración:
+  ```bash
+  APPWRITE_PROJECT_ID=tu_id APPWRITE_API_KEY=tu_key node scripts/share-workspace.mjs
+  ```
+  (API Key con scopes `databases.read/write` y `documents.read/write`; borrala al terminar.)
+
 **Flujo del admin**
 1. Crea un **evento** (ej: "Boda de Lucía y Martín").
 2. Dentro del evento, crea **trivias personalizadas**. Cada trivia tiene:
@@ -80,6 +90,20 @@ Reiniciá `npm run dev`.
    - Opciones/candidatos (con foto en el caso de "mejor vestido/a").
 3. Al crear la trivia se genera el **link público**. Botón "Copiar link" para compartirlo.
 4. "Resultados" muestra el conteo en vivo; "Cerrar/Abrir" controla si se puede votar.
+
+Podés crear **tantas trivias como quieras por evento** (ej: 15: mejor vestido, mejor bailarín,
+mejor mesa, etc.). Cada una tiene su propio link de invitados.
+
+**Ranking del evento (pantallas)**
+Cada evento tiene un **link de ranking público** (`/ranking/:eventId`) que muestra a *todos*
+los ganadores en vivo: el más votado de cada trivia de candidatos/opción múltiple y las
+respuestas de las preguntas abiertas. Se actualiza solo cada pocos segundos.
+Desde el panel del evento, botón **"Copiar link del ranking"** → pasáselo al encargado de las
+pantallas para proyectarlo. No requiere login.
+
+> Nota: el ranking puede mostrar el nombre del evento porque los eventos nuevos se crean con
+> lectura pública. Eventos creados **antes** de esta versión seguirán funcionando, pero el
+> ranking mostrará "Ranking del evento" en vez del nombre (los datos de las trivias sí se ven).
 
 **Tipos de trivia incluidos de ejemplo** (la cliente pidió mejor vestido/a; agregué los demás como pediste):
 - Votación a candidatos → ideal para "Mejor vestido" y "Mejor vestida".

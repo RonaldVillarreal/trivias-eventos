@@ -38,7 +38,7 @@ export default function Dashboard() {
 
   async function load() {
     setLoading(true);
-    setEvents(await listEvents(user.$id));
+    setEvents(await listEvents());
     setLoading(false);
   }
   useEffect(() => { load(); }, []);

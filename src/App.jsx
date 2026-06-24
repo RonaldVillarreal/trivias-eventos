@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import EventPage from "./pages/EventPage";
 import PublicVote from "./pages/PublicVote";
+import Ranking from "./pages/Ranking";
 
 // Protege rutas del panel: si no hay sesión, manda al login
 function RequireAuth({ children }) {
@@ -29,6 +30,8 @@ export default function App() {
         <Routes>
           {/* Zona pública de invitados: NO toca el panel ni requiere login */}
           <Route path="/votar/:triviaId" element={<PublicVote />} />
+          {/* Ranking proyectable del evento: público, para las pantallas */}
+          <Route path="/ranking/:eventId" element={<Ranking />} />
 
           {/* Zona del organizador */}
           <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />

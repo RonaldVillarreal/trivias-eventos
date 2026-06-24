@@ -201,7 +201,7 @@ function Shell({ trivia, children }) {
           </div>
         )}
         {children}
-        <p className="muted small center mt-4" style={{ opacity: 0.7 }}>Powered by tu servicio de eventos</p>
+        <p className="muted small center mt-4" style={{ opacity: 0.7 }}>Powered by BloomDate Eventos</p>
       </div>
     </div>
   );

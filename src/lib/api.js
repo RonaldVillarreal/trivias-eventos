@@ -42,17 +42,19 @@ export async function createEvent({ name, ownerId }) {
     ID.unique(),
     { name, ownerId, createdAt: new Date().toISOString() },
     [
-      // Solo el dueño puede leer/editar/borrar el evento desde el panel
-      Permission.read(Role.user(ownerId)),
-      Permission.update(Role.user(ownerId)),
-      Permission.delete(Role.user(ownerId)),
+      // Lectura PÚBLICA: el ranking proyectable necesita el nombre del evento
+      // sin login. Editar/borrar: cualquier admin (workspace compartido).
+      Permission.read(Role.any()),
+      Permission.update(Role.users()),
+      Permission.delete(Role.users()),
     ]
   );
 }
 
-export async function listEvents(ownerId) {
+// Lista TODOS los eventos: el panel es un workspace compartido entre admins,
+// no se filtra por dueño. (ownerId queda solo como referencia de "creado por".)
+export async function listEvents() {
   const res = await databases.listDocuments(DB, COL.events, [
-    Query.equal("ownerId", ownerId),
     Query.orderDesc("createdAt"),
     Query.limit(100),
   ]);
@@ -87,10 +89,11 @@ export async function createTrivia({ eventId, ownerId, type, title, publicName, 
       createdAt: new Date().toISOString(),
     },
     [
-      // Lectura PÚBLICA: el link de invitados no requiere login
+      // Lectura PÚBLICA: el link de invitados no requiere login.
+      // Editar/borrar: cualquier admin (workspace compartido).
       Permission.read(Role.any()),
-      Permission.update(Role.user(ownerId)),
-      Permission.delete(Role.user(ownerId)),
+      Permission.update(Role.users()),
+      Permission.delete(Role.users()),
     ]
   );
 }
@@ -116,6 +119,37 @@ export async function deleteTrivia(triviaId) {
   return databases.deleteDocument(DB, COL.trivias, triviaId);
 }
 
+/* ----------------------------- RANKING ----------------------------- */
+// Arma el ranking completo de un evento: trae el evento, todas sus trivias y,
+// para cada una, sus opciones con el conteo de votos (o las respuestas si es
+// pregunta abierta). Funciona sin login: lo usa la pantalla proyectable.
+export async function getEventRanking(eventId) {
+  // El evento puede no ser legible (eventos viejos sin permiso público): degradamos.
+  const event = await getEvent(eventId).catch(() => null);
+  const trivias = await listTrivias(eventId);
+
+  const items = await Promise.all(
+    trivias.map(async (t) => {
+      const votes = await listVotes(t.$id);
+      if (t.type === "open") {
+        const answers = votes
+          .slice()
+          .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+        return { trivia: t, open: true, answers };
+      }
+      const opts = await listOptions(t.$id);
+      const counts = {};
+      votes.forEach((v) => { counts[v.optionId] = (counts[v.optionId] || 0) + 1; });
+      const rows = opts
+        .map((o) => ({ ...o, count: counts[o.$id] || 0 }))
+        .sort((a, b) => b.count - a.count);
+      return { trivia: t, open: false, rows, total: votes.length };
+    })
+  );
+
+  return { event, items };
+}
+
 /* ----------------------------- OPCIONES ----------------------------- */
 // Para candidatos (mejor vestido/a) y opción múltiple
 
@@ -127,8 +161,8 @@ export async function createOption({ triviaId, ownerId, label, imageFileId }) {
     { triviaId, ownerId, label, imageFileId: imageFileId || "" },
     [
       Permission.read(Role.any()),
-      Permission.update(Role.user(ownerId)),
-      Permission.delete(Role.user(ownerId)),
+      Permission.update(Role.users()),
+      Permission.delete(Role.users()),
     ]
   );
 }
@@ -182,7 +216,8 @@ export async function uploadImage(file, ownerId) {
     APPWRITE.buckets.covers,
     ID.unique(),
     file,
-    [Permission.read(Role.any()), Permission.delete(Role.user(ownerId))]
+    // Lectura pública (se ven en links e invitados). Cualquier admin puede borrar.
+    [Permission.read(Role.any()), Permission.delete(Role.users())]
   );
   return res.$id;
 }

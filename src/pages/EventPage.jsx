@@ -98,9 +98,16 @@ export default function EventPage() {
   function publicLink(triviaId) {
     return `${window.location.origin}/votar/${triviaId}`;
   }
+  function rankingLink() {
+    return `${window.location.origin}/ranking/${eventId}`;
+  }
   function copyLink(triviaId) {
     navigator.clipboard.writeText(publicLink(triviaId));
     toast.show("Link copiado");
+  }
+  function copyRankingLink() {
+    navigator.clipboard.writeText(rankingLink());
+    toast.show("Link del ranking copiado");
   }
   async function toggleOpen(t) {
     await setTriviaOpen(t.$id, !t.isOpen);
@@ -128,6 +135,20 @@ export default function EventPage() {
             <p className="muted small mt-1">{trivias.length} trivia{trivias.length !== 1 ? "s" : ""}</p>
           </div>
           <button className="btn" onClick={() => setShowForm(true)}>+ Nueva trivia</button>
+        </div>
+
+        {/* Link del ranking del evento, para proyectar en pantallas */}
+        <div className="card row between wrap mb-3" style={{ padding: "16px 20px", gap: 12, background: "var(--cream)" }}>
+          <div>
+            <p style={{ fontWeight: 700 }}>📺 Ranking del evento</p>
+            <p className="muted small mt-1">
+              Link público con todos los ganadores en vivo. Pasáselo al encargado de las pantallas para proyectarlo.
+            </p>
+          </div>
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn btn-soft btn-sm" onClick={copyRankingLink}>Copiar link del ranking</button>
+            <a className="btn btn-ghost btn-sm" href={rankingLink()} target="_blank" rel="noreferrer">Ver</a>
+          </div>
         </div>
 
         {trivias.length === 0 ? (
