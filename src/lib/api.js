@@ -72,7 +72,8 @@ export async function deleteEvent(eventId) {
 /* ----------------------------- TRIVIAS ----------------------------- */
 
 // publicName: nombre independiente mostrado a los invitados
-export async function createTrivia({ eventId, ownerId, type, title, publicName, question, coverFileId }) {
+// palette: id de la paleta pastel para el fondo de la trivia (ver config)
+export async function createTrivia({ eventId, ownerId, type, title, publicName, question, palette }) {
   return databases.createDocument(
     DB,
     COL.trivias,
@@ -84,7 +85,7 @@ export async function createTrivia({ eventId, ownerId, type, title, publicName, 
       title,
       publicName: publicName || title,
       question: question || "",
-      coverFileId: coverFileId || "",
+      palette: palette || "",
       isOpen: true,
       createdAt: new Date().toISOString(),
     },
@@ -113,6 +114,11 @@ export async function getTrivia(triviaId) {
 
 export async function setTriviaOpen(triviaId, isOpen) {
   return databases.updateDocument(DB, COL.trivias, triviaId, { isOpen });
+}
+
+// Edita los campos de una trivia ya creada (título, nombre público, pregunta, color)
+export async function updateTrivia(triviaId, fields) {
+  return databases.updateDocument(DB, COL.trivias, triviaId, fields);
 }
 
 export async function deleteTrivia(triviaId) {

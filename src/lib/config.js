@@ -30,3 +30,18 @@ export const TRIVIA_TYPE_LABELS = {
   [TRIVIA_TYPES.MULTIPLE]: "Opción múltiple",
   [TRIVIA_TYPES.OPEN]: "Pregunta abierta",
 };
+
+// Paletas pastel para el fondo de cada trivia. `bg` = fondo de la pantalla,
+// `soft` = superficies/cards, `accent` = detalles (bordes, títulos).
+export const TRIVIA_PALETTES = [
+  { id: "rosa", label: "Rosa", bg: "#fbe9ef", soft: "#f6d8e4", accent: "#c76b97" },
+  { id: "durazno", label: "Durazno", bg: "#fdecdf", soft: "#fad9c2", accent: "#cd8a5c" },
+  { id: "menta", label: "Menta", bg: "#e4f3ea", soft: "#cee9d8", accent: "#5ca87c" },
+  { id: "lavanda", label: "Lavanda", bg: "#ece8f7", soft: "#dcd4f0", accent: "#8273b8" },
+];
+
+export const DEFAULT_PALETTE = TRIVIA_PALETTES[0];
+
+export function getPalette(id) {
+  return TRIVIA_PALETTES.find((p) => p.id === id) || DEFAULT_PALETTE;
+}

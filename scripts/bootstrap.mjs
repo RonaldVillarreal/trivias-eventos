@@ -65,6 +65,7 @@ async function run() {
   await safe("trivias.publicName", () => databases.createStringAttribute(DB_ID, "trivias", "publicName", 200, false));
   await safe("trivias.question", () => databases.createStringAttribute(DB_ID, "trivias", "question", 500, false));
   await safe("trivias.coverFileId", () => databases.createStringAttribute(DB_ID, "trivias", "coverFileId", 64, false));
+  await safe("trivias.palette", () => databases.createStringAttribute(DB_ID, "trivias", "palette", 20, false));
   await safe("trivias.isOpen", () => databases.createBooleanAttribute(DB_ID, "trivias", "isOpen", false, true));
   await safe("trivias.createdAt", () => databases.createStringAttribute(DB_ID, "trivias", "createdAt", 40, false));
   await sleep(800);

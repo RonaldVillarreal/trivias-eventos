@@ -3,11 +3,12 @@ import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   getEvent, listTrivias, deleteTrivia, setTriviaOpen,
-  listVotes, listOptions, imageUrl,
+  listVotes, listOptions,
 } from "../lib/api";
-import { TRIVIA_TYPE_LABELS, TRIVIA_TYPES } from "../lib/config";
+import { TRIVIA_TYPE_LABELS, TRIVIA_TYPES, getPalette } from "../lib/config";
 import TopBar from "../components/TopBar";
 import TriviaForm from "../components/TriviaForm";
+import QRCode from "../components/QRCode";
 import { Spinner, Modal, Toast, useToast } from "../components/ui";
 
 function ResultsView({ trivia }) {
@@ -82,7 +83,8 @@ export default function EventPage() {
   const [event, setEvent] = useState(null);
   const [trivias, setTrivias] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  // null = cerrado · "new" = crear · objeto trivia = editar
+  const [form, setForm] = useState(null);
   const [results, setResults] = useState(null);
   const toast = useToast();
 
@@ -101,13 +103,16 @@ export default function EventPage() {
   function rankingLink() {
     return `${window.location.origin}/ranking/${eventId}`;
   }
-  function copyLink(triviaId) {
-    navigator.clipboard.writeText(publicLink(triviaId));
-    toast.show("Link copiado");
+  function eventLink() {
+    return `${window.location.origin}/evento/${eventId}`;
   }
   function copyRankingLink() {
     navigator.clipboard.writeText(rankingLink());
     toast.show("Link del ranking copiado");
+  }
+  function copyEventLink() {
+    navigator.clipboard.writeText(eventLink());
+    toast.show("Link del evento copiado");
   }
   async function toggleOpen(t) {
     await setTriviaOpen(t.$id, !t.isOpen);
@@ -134,7 +139,23 @@ export default function EventPage() {
             <h1 style={{ fontSize: 30, marginTop: 4 }}>{event.name}</h1>
             <p className="muted small mt-1">{trivias.length} trivia{trivias.length !== 1 ? "s" : ""}</p>
           </div>
-          <button className="btn" onClick={() => setShowForm(true)}>+ Nueva trivia</button>
+          <button className="btn" onClick={() => setForm("new")}>+ Nueva trivia</button>
+        </div>
+
+        {/* Link + QR para los invitados: entran, ponen su nombre y ven todas las trivias */}
+        <div className="card row between wrap mb-3" style={{ padding: "16px 20px", gap: 16, background: "var(--cream)" }}>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <p style={{ fontWeight: 700 }}>🎟️ Link para invitados</p>
+            <p className="muted small mt-1">
+              Compartí este link o el QR. El invitado pone su nombre y elige qué trivia responder.
+              Imprimí el QR para las mesas.
+            </p>
+            <div className="row mt-2" style={{ gap: 8, flexWrap: "wrap" }}>
+              <button className="btn btn-sm" onClick={copyEventLink}>Copiar link del evento</button>
+              <a className="btn btn-ghost btn-sm" href={eventLink()} target="_blank" rel="noreferrer">Ver</a>
+            </div>
+          </div>
+          <QRCode value={eventLink()} size={150} fileName={`qr-evento-${event.name}`} />
         </div>
 
         {/* Link del ranking del evento, para proyectar en pantallas */}
@@ -155,17 +176,15 @@ export default function EventPage() {
           <div className="card center" style={{ padding: "56px 24px" }}>
             <h3 style={{ fontSize: 20 }}>Sin trivias todavía</h3>
             <p className="muted small mt-1">Creá la primera trivia para generar el link de invitados.</p>
-            <button className="btn mt-2" onClick={() => setShowForm(true)}>Crear trivia</button>
+            <button className="btn mt-2" onClick={() => setForm("new")}>Crear trivia</button>
           </div>
         ) : (
           <div className="grid">
-            {trivias.map((t) => (
+            {trivias.map((t) => {
+              const pal = getPalette(t.palette);
+              return (
               <div key={t.$id} className="card" style={{ display: "flex", flexDirection: "column" }}>
-                {t.coverFileId ? (
-                  <img src={imageUrl(t.coverFileId)} alt="" style={{ width: "100%", height: 130, objectFit: "cover" }} />
-                ) : (
-                  <div style={{ height: 130, background: "linear-gradient(135deg, var(--mauve), var(--peach))" }} />
-                )}
+                <div style={{ height: 90, background: `linear-gradient(135deg, ${pal.bg}, ${pal.soft})`, borderBottom: `3px solid ${pal.accent}` }} />
                 <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
                   <div className="row between" style={{ gap: 8 }}>
                     <span className="pill mauve">{TRIVIA_TYPE_LABELS[t.type]}</span>
@@ -178,8 +197,8 @@ export default function EventPage() {
 
                   <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
                     <div className="row" style={{ gap: 8 }}>
-                      <button className="btn btn-soft btn-sm" style={{ flex: 1 }} onClick={() => copyLink(t.$id)}>
-                        Copiar link
+                      <button className="btn btn-soft btn-sm" style={{ flex: 1 }} onClick={() => setForm(t)}>
+                        Editar
                       </button>
                       <a className="btn btn-ghost btn-sm" href={publicLink(t.$id)} target="_blank" rel="noreferrer">Ver</a>
                     </div>
@@ -195,17 +214,24 @@ export default function EventPage() {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
 
-      <Modal open={showForm} onClose={() => setShowForm(false)} title="Nueva trivia" width={580}>
+      <Modal open={!!form} onClose={() => setForm(null)} title={form === "new" ? "Nueva trivia" : "Editar trivia"} width={580}>
         <TriviaForm
           eventId={eventId}
           ownerId={user.$id}
-          onCancel={() => setShowForm(false)}
-          onCreated={() => { setShowForm(false); toast.show("Trivia creada"); load(); }}
+          trivia={form === "new" ? null : form}
+          onCancel={() => setForm(null)}
+          onCreated={() => {
+            const wasEdit = form !== "new";
+            setForm(null);
+            toast.show(wasEdit ? "Trivia actualizada" : "Trivia creada");
+            load();
+          }}
         />
       </Modal>
 
