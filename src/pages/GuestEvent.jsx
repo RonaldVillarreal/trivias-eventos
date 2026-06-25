@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getEvent, listTrivias } from "../lib/api";
-import { TRIVIA_TYPE_LABELS, TRIVIA_PALETTES, getPalette } from "../lib/config";
+import { TRIVIA_TYPE_LABELS, TRIVIA_TYPES, TRIVIA_PALETTES, getPalette } from "../lib/config";
 
-// Degradado suave que combina los cuatro tonos pastel de las paletas.
-const HUB_BG = `linear-gradient(160deg, ${TRIVIA_PALETTES.map((p) => p.bg).join(", ")})`;
+// Emoji por tipo de trivia (va en el cuadrito de vidrio de cada card).
+const TYPE_EMOJI = {
+  [TRIVIA_TYPES.CANDIDATES]: "🏅",
+  [TRIVIA_TYPES.MULTIPLE]: "🎯",
+  [TRIVIA_TYPES.OPEN]: "💬",
+};
 import { getVoterName, setVoterName, getVotedSet } from "../lib/guest";
 import { Spinner } from "../components/ui";
 
@@ -99,7 +103,7 @@ export default function GuestEvent() {
           Hola <strong>{name}</strong> · respondiste {doneCount} de {ordered.length}
         </p>
         {answerable.length > 0 && (
-          <button className="btn btn-sm" onClick={() => navigate(`/votar/${answerable[0].$id}`)}>
+          <button className="btn btn-sm glass-btn-all" onClick={() => navigate(`/votar/${answerable[0].$id}`)}>
             ▶ Responder todas seguidas
           </button>
         )}
@@ -110,44 +114,29 @@ export default function GuestEvent() {
           <h2 style={{ fontSize: 20 }}>Todavía no hay trivias en este evento</h2>
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: 16,
-          }}
-        >
+        <div className="hub-grid">
           {ordered.map((t) => {
             const pal = getPalette(t.palette);
             const isVoted = voted.has(t.$id);
             const isClosed = !t.isOpen;
             const disabled = isVoted || isClosed;
+            const cta = isVoted ? "Ya respondida" : isClosed ? "Cerrada" : "Responder";
             return (
               <button
                 key={t.$id}
+                className={`glass-card${isVoted ? " done" : ""}${isClosed ? " closed" : ""}`}
                 disabled={disabled}
                 onClick={() => !disabled && navigate(`/votar/${t.$id}`)}
-                style={{
-                  textAlign: "left",
-                  borderRadius: "var(--radius)",
-                  border: `1.5px solid ${disabled ? "var(--line)" : pal.accent}`,
-                  background: disabled ? "var(--linen)" : pal.bg,
-                  padding: 18,
-                  cursor: disabled ? "default" : "pointer",
-                  opacity: disabled ? 0.6 : 1,
-                  minHeight: 130,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 10,
-                  transition: "transform 0.12s",
-                }}
+                style={{ "--accent": pal.accent, "--accent-strong": pal.accent, "--text": "#2f2937" }}
               >
-                <span className="pill" style={{ alignSelf: "flex-start", background: disabled ? "var(--linen)" : pal.soft, color: pal.accent }}>
-                  {TRIVIA_TYPE_LABELS[t.type]}
-                </span>
-                <strong style={{ fontSize: 18 }}>{t.publicName || t.title}</strong>
-                <span style={{ marginTop: "auto", fontWeight: 700, color: pal.accent }}>
-                  {isVoted ? "✓ Ya respondida" : isClosed ? "Cerrada" : "Responder →"}
+                {isVoted && <span className="glass-badge" aria-label="Respondida">✓</span>}
+                <div className="glass-row">
+                  <span className="glass-emoji">{TYPE_EMOJI[t.type] || "✨"}</span>
+                  <span className="glass-chip">{TRIVIA_TYPE_LABELS[t.type]}</span>
+                </div>
+                <span className="glass-title">{t.publicName || t.title}</span>
+                <span className="glass-cta">
+                  {cta}{!disabled && <span className="arrow">→</span>}
                 </span>
               </button>
             );
@@ -160,8 +149,13 @@ export default function GuestEvent() {
 
 function Shell({ title, children }) {
   return (
-    <div style={{ minHeight: "100vh", background: HUB_BG }}>
-      <div className="container" style={{ padding: "40px 22px 70px" }}>
+    <div className="hub-bg">
+      {/* Orbes de color difusos: hacen que el efecto vidrio de las cards se note */}
+      <div className="hub-orb" style={{ background: TRIVIA_PALETTES[0].accent, top: "-80px", left: "-60px", width: 360, height: 360 }} />
+      <div className="hub-orb" style={{ background: TRIVIA_PALETTES[2].accent, bottom: "-120px", right: "-80px", width: 420, height: 420 }} />
+      <div className="hub-orb" style={{ background: TRIVIA_PALETTES[3].accent, top: "30%", right: "15%", width: 300, height: 300 }} />
+
+      <div className="hub-content container" style={{ padding: "40px 22px 70px" }}>
         <div className="center mb-3">
           <p className="eyebrow">Trivias del evento</p>
           <h1 style={{ fontSize: "clamp(26px, 4vw, 36px)", marginTop: 6 }}>{title || "Evento"}</h1>

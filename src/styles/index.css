@@ -123,6 +123,175 @@ label {
   gap: 18px;
 }
 
+/* ===================== Hub de invitados · glassmorphism ===================== */
+.hub-bg {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, #fbf1f6 0%, #f3f0fb 55%, #edf6f1 100%);
+}
+.hub-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.45;
+  z-index: 0;
+  pointer-events: none;
+}
+.hub-content { position: relative; z-index: 1; }
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+@media (max-width: 900px) { .hub-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .hub-grid { grid-template-columns: 1fr; } }
+
+.glass-card {
+  position: relative;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 156px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.5);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: blur(20px) saturate(165%);
+  box-shadow:
+    0 14px 40px rgba(31, 25, 40, 0.12),
+    0 4px 12px rgba(31, 25, 40, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+}
+.glass-card::after {
+  content: "";
+  position: absolute;
+  top: -45px;
+  right: -45px;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.18;
+  filter: blur(34px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+}
+.glass-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 26px 60px rgba(31, 25, 40, 0.18),
+    0 8px 20px rgba(31, 25, 40, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+.glass-card:hover::after { opacity: 0.34; transform: scale(1.18); }
+.glass-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.glass-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.glass-emoji {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+.glass-chip {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 5px 10px;
+  border-radius: 999px;
+}
+.glass-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+.glass-cta {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--accent-strong);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 8px 16px;
+  border-radius: 999px;
+  transition: gap 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.glass-card:hover .glass-cta { background: var(--accent); color: #fff; gap: 10px; }
+.glass-cta .arrow { transition: transform 0.2s ease; }
+.glass-card:hover .glass-cta .arrow { transform: translateX(3px); }
+
+.glass-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #fff;
+  background: #5ca87c;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  z-index: 2;
+}
+
+.glass-card.done,
+.glass-card.closed { cursor: default; opacity: 0.82; }
+.glass-card.done::after,
+.glass-card.closed::after { opacity: 0.08; }
+.glass-card.done:hover,
+.glass-card.closed:hover { transform: none; box-shadow:
+    0 14px 40px rgba(31, 25, 40, 0.12),
+    0 4px 12px rgba(31, 25, 40, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75); }
+.glass-card.done:hover .glass-cta,
+.glass-card.closed:hover .glass-cta { background: rgba(255, 255, 255, 0.5); color: var(--accent-strong); gap: 6px; }
+
+/* Botón "Responder todas seguidas" con el mismo lenguaje de vidrio */
+.glass-btn-all {
+  background: rgba(255, 255, 255, 0.5);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: var(--ink);
+  box-shadow: 0 6px 18px rgba(31, 25, 40, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.glass-btn-all:hover {
+  background: rgba(255, 255, 255, 0.65);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(31, 25, 40, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card, .glass-card::after, .glass-cta, .glass-cta .arrow, .glass-btn-all { transition: none; }
+  .glass-card:hover, .glass-btn-all:hover { transform: none; }
+}
+
 /* ---------- Pills / badges ---------- */
 .pill {
   display: inline-flex;
